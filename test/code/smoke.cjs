@@ -3,6 +3,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const { UWProskomma } = require('uw-proskomma');
 import { doRender } from '../../src';
+import perf2html from '../../src/perf2html';
 
 
 const testGroup = 'Smoke';
@@ -31,7 +32,7 @@ test(
           [docSetId],
           [documentId],
           );
-      console.log(JSON.stringify(config2, null, 2));
+      console.log(perf2html(config2.output));
       t.ok(true);
     } catch (err) {
       console.log(err);
