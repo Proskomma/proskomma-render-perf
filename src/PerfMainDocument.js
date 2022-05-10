@@ -105,6 +105,23 @@ export default class PerfMainDocument extends JsonMainDocument {
                     this.lastBlock(renderer, context).content.push("");                }
             }
         );
+        this.addAction(
+            'inlineGraft',
+            (context, data) => true,
+            (renderer, context, data) => {
+                const sequence = this.outputSequence(renderer, context);
+                if (sequence.selected) {
+                    console.log("here");
+                    process.exit(1);
+                    this.currentBlockContext(renderer, context).push({
+                        type: "graft",
+                        subType: data.subType,
+                        target: data.payload,
+                    });
+                    this.currentBlockContext(renderer, context).push("");
+               }
+            }
+        );
     }
 
 

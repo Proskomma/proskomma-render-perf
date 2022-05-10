@@ -21,11 +21,15 @@ test(
               docSets: {},
           }
       };
+      const query = '{docSets { id documents {id bookCode: header(id:"bookCode")} } }';
+      const gqlResult = pk.gqlQuerySync(query);
+      const docSetId = gqlResult.data.docSets[0].id;
+      const documentId = gqlResult.data.docSets[0].documents.filter(d => d.bookCode === 'REV')[0].id;
       const config2 = await doRender(
           pk,
           config,
-          [],
-          [],
+          [docSetId],
+          [documentId],
           );
       console.log(JSON.stringify(config2, null, 2));
       t.ok(true);
