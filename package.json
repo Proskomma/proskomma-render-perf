@@ -1,0 +1,39 @@
+{
+  "name": "proskomma-render-perf",
+  "version": "0.0.1",
+  "description": "A Proskomma renderer to produce Proskomma Editor-Ready Format JSON (PERF)",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "bash -c \"babel-tape-runner test/code/*.cjs | node_modules/tap-summary/bin/cmd.js\"",
+    "rawTest": "babel-tape-runner test/code/*.cjs",
+    "oneTest": "babel-tape-runner test/code/$TESTSCRIPT.cjs",
+    "coverage": "node_modules/nyc/bin/nyc.js babel-tape-runner test/code/*.cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Proskomma/proskomma-render-perf.git"
+  },
+  "author": "Mark Howe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Proskomma/proskomma-render-perf/issues"
+  },
+  "homepage": "https://github.com/Proskomma/proskomma-render-perf#readme",
+  "dependencies": {
+    "@babel/core": "^7.17.10",
+    "proskomma-render": "^0.6.0",
+    "proskomma-render-json": "0.0.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.17.10",
+    "@babel/preset-env": "^7.17.10",
+    "babel-eslint": "^10.1.0",
+    "babel-tape-runner": "^3.0.0",
+    "eslint": "^8.15.0",
+    "fs-extra": "^10.1.0",
+    "path": "^0.12.7",
+    "tap-summary": "^4.0.0",
+    "tape": "^5.5.3",
+    "uw-proskomma": "^0.6.4"
+  }
+}
