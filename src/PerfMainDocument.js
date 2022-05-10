@@ -41,6 +41,37 @@ export default class PerfMainDocument extends JsonMainDocument {
 
     addLocalActions() {
         this.addAction(
+            'blockGraft',
+            () => true,
+            (renderer, context, data) => {
+                const sequence = this.outputSequence(renderer, context);
+                if (sequence.selected) {
+                    if (!sequence.blocks) {
+                        sequence.blocks = [];
+                    }
+                    if (
+                        sequence.blocks.length === 0 ||
+                        sequence.blocks[sequence.blocks.length - 1].subType !== 'hangingGraft'
+                    ) {
+                        sequence.blocks.push({});
+                    }
+                    sequence.blocks[sequence.blocks.length - 1].type = "graft";
+                    sequence.blocks[sequence.blocks.length - 1].subType = data.subType;
+                    sequence.blocks[sequence.blocks.length - 1].target = data.payload;
+                    sequence.blocks[sequence.blocks.length - 1].nBlocks = this.sequenceById(renderer, context, data.payload).nBlocks;
+                    sequence.blocks[sequence.blocks.length - 1].initialText = this.sequenceById(renderer, context, data.payload).initialText;
+                    delete sequence.blocks[sequence.blocks.length - 1].content;
+                    sequence.blocks.push(
+                        {
+                            type: "block",
+                            subType: "hangingGraft",
+                            content: [""],
+                        }
+                    );
+                }
+            }
+        );
+        this.addAction(
             'startBlock',
             () => true,
             (renderer, context, data) => {
@@ -49,18 +80,17 @@ export default class PerfMainDocument extends JsonMainDocument {
                     if (!sequence.blocks) {
                         sequence.blocks = [];
                     }
-                    data.bg.map(bg => {
+                    if (
+                        sequence.blocks.length === 0 ||
+                        sequence.blocks[sequence.blocks.length - 1].subType !== 'hangingGraft'
+                    ) {
                         sequence.blocks.push({
-                            type: "graft",
-                            subType: bg.subType,
-                            target: bg.payload,
-                        });
-                    });
-                    sequence.blocks.push({
-                        type: "block",
-                        subType: data.bs.payload.split('/')[1] || data.bs.payload,
-                        content: [""],
-                    });
+                            type: "block",
+                            content: [],
+                        })
+                    }
+                    sequence.blocks[sequence.blocks.length - 1].subType = data.bs.payload.split('/')[1] || data.bs.payload;
+                    sequence.blocks[sequence.blocks.length - 1].content.push("");
                 }
             }
         );
@@ -89,7 +119,8 @@ export default class PerfMainDocument extends JsonMainDocument {
                         type: "chapter",
                         number: `${data.payload.split('/')[1]}`
                     });
-                    this.lastBlock(renderer, context).content.push("");                }
+                    this.lastBlock(renderer, context).content.push("");
+                }
             }
         );
         this.addAction(
@@ -102,7 +133,8 @@ export default class PerfMainDocument extends JsonMainDocument {
                         type: "verses",
                         number: `${data.payload.split('/')[1]}`
                     });
-                    this.lastBlock(renderer, context).content.push("");                }
+                    this.lastBlock(renderer, context).content.push("");
+                }
             }
         );
         this.addAction(
@@ -111,15 +143,17 @@ export default class PerfMainDocument extends JsonMainDocument {
             (renderer, context, data) => {
                 const sequence = this.outputSequence(renderer, context);
                 if (sequence.selected) {
-                    console.log("here");
-                    process.exit(1);
-                    this.currentBlockContext(renderer, context).push({
-                        type: "graft",
-                        subType: data.subType,
-                        target: data.payload,
-                    });
-                    this.currentBlockContext(renderer, context).push("");
-               }
+                    this.currentBlockContext(renderer, context).push(
+                        {
+                            type: "graft",
+                            subType: data.subType,
+                            target: data.payload,
+                            nBlocks: this.sequenceById(renderer, context, data.payload).nBlocks,
+                            initialText: this.sequenceById(renderer, context, data.payload).initialText,
+                        },
+                        ""
+                    );
+                }
             }
         );
     }
