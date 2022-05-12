@@ -1,4 +1,4 @@
-const bgHtml = bg => `    <div class="graft ${bg.subType}" data-graftType="${bg.subType}" data-target="${bg.target}" data-nBlocks="${bg.nBlocks}">${bg.initialText}</div>`;
+const bgHtml = bg => `    <div class="graft ${bg.subType}${bg.subType === "heading" ? " " + bg.firstBlockScope: ''}" data-graftType="${bg.subType}" data-target="${bg.target}" data-nBlocks="${bg.nBlocks}">${previewText(bg)}</div>`;
 
 const blockHtml = b => `    <div class="block ${b.subType}">${b.content.map(bc => blockItemHtml(bc)).join('')}</div>`;
 
@@ -6,9 +6,19 @@ const blockItemHtml = bi => (typeof bi === 'string') ? bi : blockItemObjectHtml(
 
 const blockItemObjectHtml = bi => bi.type === 'graft' ? inlineGraftHtml(bi) : cvObjectHtml(bi);
 
-const inlineGraftHtml = bg => `<span class="graft ${bg.subType}" data-graftType="${bg.subType}" data-target="${bg.target}" data-nBlocks="${bg.nBlocks}">${bg.initialText}</span>`;
+const inlineGraftHtml = ig => `<span class="graft ${ig.subType}" data-graftType="${ig.subType}" data-target="${ig.target}" data-nBlocks="${ig.nBlocks}">${previewText(ig)}</span>`;
 
-const cvObjectHtml = bi => `<span class="${bi.type}">${bi.number}</span>`
+const cvObjectHtml = bi => `<span class="${bi.type}">${bi.number}</span>`;
+
+const previewText = g => g.subType in previewTextFormats ? previewTextFormats[g.subType](g) : g.previewText;
+
+const previewTextFormats = {
+    xref: () => "†",
+    footnote: () => "*",
+    title: g => `TITLE: ${g.previewText}${g.nBlocks > 1 ? ` (${g.nBlocks} paras)`: ''}`,
+    introduction: g => `INTRODUCTION: ${g.previewText.split(' ').slice(0, 25).join(' ')} [...] (${g.nBlocks} para${g.nBlocks > 0 ? 's' : ''})`,
+};
+
 
 const perf2html = perf => {
     const [docSetId, docSetOb] = Object.entries(perf.docSets)[0];
@@ -16,9 +26,10 @@ const perf2html = perf => {
     const [sequenceId, sequenceOb] = Object.entries(documentOb.sequences).filter(s => s[1].selected)[0];
     return `<div id="sequence" data-docSetId="${docSetId}" data-bookCode="${bookCode}" data-sequenceId="${sequenceId}">
   <div id="headers">
-${Object.entries(documentOb.headers).map(h =>
-        `    <div class="header" id="header_${h[0]}">${h[1]}</div>`
-    ).join('\n')
+${
+        Object.entries(documentOb.headers).map(h =>
+            `    <div class="header" id="header_${h[0]}">${h[1]}</div>`
+        ).join('\n')
     }
   </div>
   <div id="content">

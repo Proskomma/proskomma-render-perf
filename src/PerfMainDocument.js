@@ -59,7 +59,8 @@ export default class PerfMainDocument extends JsonMainDocument {
                     sequence.blocks[sequence.blocks.length - 1].subType = data.subType;
                     sequence.blocks[sequence.blocks.length - 1].target = data.payload;
                     sequence.blocks[sequence.blocks.length - 1].nBlocks = this.sequenceById(renderer, context, data.payload).nBlocks;
-                    sequence.blocks[sequence.blocks.length - 1].initialText = this.sequenceById(renderer, context, data.payload).initialText;
+                    sequence.blocks[sequence.blocks.length - 1].previewText = this.sequenceById(renderer, context, data.payload).previewText;
+                    sequence.blocks[sequence.blocks.length - 1].firstBlockScope = this.sequenceById(renderer, context, data.payload).firstBlockScope;
                     delete sequence.blocks[sequence.blocks.length - 1].content;
                     sequence.blocks.push(
                         {
@@ -149,7 +150,7 @@ export default class PerfMainDocument extends JsonMainDocument {
                             subType: data.subType,
                             target: data.payload,
                             nBlocks: this.sequenceById(renderer, context, data.payload).nBlocks,
-                            initialText: this.sequenceById(renderer, context, data.payload).initialText,
+                            previewText: this.sequenceById(renderer, context, data.payload).previewText,
                         },
                         ""
                     );
