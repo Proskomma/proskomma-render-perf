@@ -1,12 +1,12 @@
-const bgHtml = bg => `    <div class="graft graft_${bg.subType}" data-graftType="${bg.subType}" data-target="${bg.target}" data-nBlocks="${bg.nBlocks}">${bg.initialText}</div>`;
+const bgHtml = bg => `    <div class="graft ${bg.subType}" data-graftType="${bg.subType}" data-target="${bg.target}" data-nBlocks="${bg.nBlocks}">${bg.initialText}</div>`;
 
-const blockHtml = b => `    <div class="block block_${b.subType}">${b.content.map(bc => blockItemHtml(bc)).join('')}</div>`;
+const blockHtml = b => `    <div class="block ${b.subType}">${b.content.map(bc => blockItemHtml(bc)).join('')}</div>`;
 
 const blockItemHtml = bi => (typeof bi === 'string') ? bi : blockItemObjectHtml(bi);
 
 const blockItemObjectHtml = bi => bi.type === 'graft' ? inlineGraftHtml(bi) : cvObjectHtml(bi);
 
-const inlineGraftHtml = bg => `<span class="graft graft_${bg.subType}" data-graftType="${bg.subType}" data-target="${bg.target}" data-nBlocks="${bg.nBlocks}">${bg.initialText}</span>`;
+const inlineGraftHtml = bg => `<span class="graft ${bg.subType}" data-graftType="${bg.subType}" data-target="${bg.target}" data-nBlocks="${bg.nBlocks}">${bg.initialText}</span>`;
 
 const cvObjectHtml = bi => `<span class="${bi.type}">${bi.number}</span>`
 
