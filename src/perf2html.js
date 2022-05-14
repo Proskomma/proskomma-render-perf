@@ -1,4 +1,4 @@
-const bgHtml = bg => `    <div class="graft ${bg.subType}${bg.subType === "heading" ? " " + bg.firstBlockScope: ''}" data-graftType="${bg.subType}" data-target="${bg.target}" data-nBlocks="${bg.nBlocks}">${previewText(bg)}</div>`;
+const bgHtml = bg => `    <div class="graft ${bg.subType}${bg.subType === "heading" ? " " + bg.firstBlockScope: ''}" data-graftType="${bg.subType}" data-target="${bg.target}" data-nBlocks="${bg.nBlocks}" data-previewText="${previewText(bg)}"> </div>`;
 
 const blockHtml = b => `    <div class="block ${b.subType}">${b.content.map(bc => blockItemHtml(bc)).join('')}</div>`;
 
@@ -6,7 +6,7 @@ const blockItemHtml = bi => (typeof bi === 'string') ? bi : blockItemObjectHtml(
 
 const blockItemObjectHtml = bi => bi.type === 'graft' ? inlineGraftHtml(bi) : cvObjectHtml(bi);
 
-const inlineGraftHtml = ig => `<span class="graft ${ig.subType}" data-graftType="${ig.subType}" data-target="${ig.target}" data-nBlocks="${ig.nBlocks}">${previewText(ig)}</span>`;
+const inlineGraftHtml = ig => `<span class="graft ${ig.subType}" data-graftType="${ig.subType}" data-target="${ig.target}" data-nBlocks="${ig.nBlocks}" data-previewText="${previewText(ig)}"> </span>`;
 
 const cvObjectHtml = bi => `<span class="${bi.type}">${bi.number}</span>`;
 
