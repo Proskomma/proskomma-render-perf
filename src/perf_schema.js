@@ -1,69 +1,130 @@
 export default ({
 
     "$defs": {
-        graft: {
+
+        contentElement: {
             type: "object",
             properties: {
-                type: {type: "string"},
-                nBlocks: {type: "integer"},
-                firstBlockScope: {type: "string"},
-                previewText: {type: "string"},
-                selected: {type: "boolean"},
-                blocks: {
-                    type: "array",
-                    items: {
-                        type: "object",
-                        properties: {
-                            type: {type: "string"},
-                            subType: {type: "string"},
-                            target: {type: "string"},
-                        },
-                        required: ["type", "subType", "target"],
-                        additionalProperties: false,
-                    },
+                type: {
+                    type: "string",
                 },
-            },
-            required: [
-                "type",
-                "nBlocks",
-                "firstBlockScope",
-                "previewText",
-                "selected",
-            ],
-            additionalProperties: false,
-        },
-        block: {
-            type: "object",
-            properties: {
-                type: {type: "string"},
-                nBlocks: {type: "integer"},
-                firstBlockScope: {type: "string"},
-                previewText: {type: "string"},
-                selected: {type: "boolean"},
-                blocks: {
-                    type: "array",
-                    items: {
-                        type: "object",
-                        properties: {
-                            type: {type: "string"},
-                            subType: {type: "string"},
-                            target: {type: "string"},
-                        },
-                        required: ["type", "subType", "target"],
-                        additionalProperties: false,
-                    },
+                number: {type: "string"},
+                subType: {
+                    type: "string",
+                    enum: [
+                        "verses",
+                        "xref",
+                    ],
                 },
+                target: {type: "string"},
+                nBlocks: {type: "integer"},
+                previewText: {type: "string"},
             },
-            required: [
-                "type",
-                "nBlocks",
-                "firstBlockScope",
-                "previewText",
-                "selected",
-            ],
+            required: ["type"],
             additionalProperties: false,
         },
 
+        blockOrGraft: {
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    type: {
+                        type: "string",
+                        enum: ["block", "graft"],
+                    },
+                    subType: {type: "string"},
+                    target: {type: "string"},
+                    nBlocks: {type: "integer"},
+                    previewText: {type: "string"},
+                    firstBlockScope: {type: "string"},
+                    content: {
+                        type: "array",
+                        items: {
+                            oneOf: [
+                                {type: "string"},
+                                {"$ref": "#/$defs/contentElement"},
+                            ]
+                        }
+                    },
+                },
+                required: ["type", "subType"],
+                additionalProperties: false,
+                if: {properties: {type: {enum: ["block"]}}},
+                then: {
+                    required: [
+                        'content',
+                    ],
+                },
+                else: {
+                    required: [
+                        'target',
+                        'nBlocks',
+                        'previewText',
+                        'firstBlockScope',
+                    ]
+                 },
+            },
+        },
+
+        sequence: {
+            type: "object",
+            properties: {
+                type: {
+                    type: "string",
+                    enum: [
+                        "main",
+                        "introduction",
+                        "introTitle",
+                        "IntroEndTitle",
+                        "title",
+                        "endTitle",
+                        "heading",
+                        "remark",
+                        "sidebar",
+                        "table",
+                        "tree",
+                        "kv",
+                        "footnote",
+                        "noteCaller",
+                        "xref",
+                        "pubNumber",
+                        "altNumber",
+                        "esbCat",
+                        "fig",
+                        "temp",
+                    ],
+                },
+                nBlocks: {type: "integer"},
+                firstBlockScope: {type: "string"},
+                previewText: {type: "string"},
+                selected: {type: "boolean"},
+                blocks: {"$ref": "#/$defs/blockOrGraft"},
+            },
+            required: [
+                "type",
+                "selected",
+            ],
+            additionalProperties: false,
+            if: {properties: {selected: {enum: [true]}}},
+            then: {
+                allOf: [
+                    {required: ['blocks']},
+                ],
+            },
+            else: {
+                allOf: [
+                    {not: {required: ['blocks']}},
+                    {
+                        required: [
+                            "nBlocks",
+                            "firstBlockScope",
+                            "previewText",
+                        ],
+                    },
+                ],
+            },
+        },
     },
     type: "object",
     properties: {
@@ -121,10 +182,7 @@ export default ({
                                         pattern: "^\\S+$",
                                     },
                                     additionalProperties: {
-                                        type: "object",
-                                        oneOf: [
-                                            {"$ref": "#/$defs/graft"}
-                                        ],
+                                        "$ref": "#/$defs/sequence",
                                     },
                                 },
                                 mainSequence: {type: "string"},

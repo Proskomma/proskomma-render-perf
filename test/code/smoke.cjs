@@ -32,10 +32,10 @@ test(
                 [docSetId],
                 [documentId],
             );
+            t.equal(config2.validationErrors, null);
             console.log(perf2html(config2.output));
-            // console.log(JSON.stringify(config2.output.docSets["eBible/fra_fraLSG"].documents["PHP"].sequences, null, 2));
+            // console.log(JSON.stringify(config2.output.docSets["eBible/fra_fraLSG"].documents["PHP"].sequences["YzQ2ZDMwMzQt"].blocks[4].content[8], null, 2));
             // console.log(config2.validationErrors);
-            t.ok(true);
         } catch (err) {
             console.log(err);
         }
