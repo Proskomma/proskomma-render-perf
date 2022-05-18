@@ -3,8 +3,6 @@ const path = require('path');
 const fse = require('fs-extra');
 const {UWProskomma} = require('uw-proskomma');
 import {doRender} from '../../src';
-import perf2html from '../../src/perf2html';
-
 
 const testGroup = 'Smoke';
 
@@ -33,8 +31,7 @@ test(
                 [documentId],
             );
             t.equal(config2.validationErrors, null);
-            console.log(perf2html(config2.output));
-            // console.log(JSON.stringify(config2.output.docSets["eBible/fra_fraLSG"].documents["PHP"].sequences["YzQ2ZDMwMzQt"].blocks[4].content[8], null, 2));
+            console.log(JSON.stringify(config2.output.docSets["eBible/fra_fraLSG"].documents["JON"].sequences, null, 2));
             // console.log(config2.validationErrors);
         } catch (err) {
             console.log(err);
