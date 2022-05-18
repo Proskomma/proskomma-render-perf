@@ -25,7 +25,7 @@ test(
             const query = '{docSets { id documents {id bookCode: header(id:"bookCode")} } }';
             const gqlResult = pk.gqlQuerySync(query);
             const docSetId = gqlResult.data.docSets[0].id;
-            const documentId = gqlResult.data.docSets[0].documents.filter(d => d.bookCode === 'PHP')[0].id;
+            const documentId = gqlResult.data.docSets[0].documents.filter(d => d.bookCode === 'JON')[0].id;
             const config2 = await doRender(
                 pk,
                 config,
