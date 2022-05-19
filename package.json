@@ -1,6 +1,6 @@
 {
   "name": "proskomma-render-perf",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A Proskomma renderer to produce Proskomma Editor-Ready Format JSON (PERF)",
   "main": "dist/index.js",
   "scripts": {

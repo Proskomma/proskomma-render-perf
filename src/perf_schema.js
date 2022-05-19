@@ -64,7 +64,7 @@ export default ({
                         'previewText',
                         'firstBlockScope',
                     ]
-                 },
+                },
             },
         },
 
@@ -114,15 +114,10 @@ export default ({
                 ],
             },
             else: {
-                allOf: [
-                    {not: {required: ['blocks']}},
-                    {
-                        required: [
-                            "nBlocks",
-                            "firstBlockScope",
-                            "previewText",
-                        ],
-                    },
+                required: [
+                    "nBlocks",
+                    "firstBlockScope",
+                    "previewText",
                 ],
             },
         },
