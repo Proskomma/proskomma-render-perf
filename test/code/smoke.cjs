@@ -16,6 +16,7 @@ test(
             pk.loadSuccinctDocSet(succinctJson);
             const config = {
                 selectedSequenceId: null,
+                allSequences: false,
                 output: {
                     docSets: {},
                 }

@@ -45,7 +45,7 @@ export default class PerfMainDocument extends JsonMainDocument {
             () => true,
             (renderer, context, data) => {
                 const sequence = this.outputSequence(renderer, context);
-                if (sequence.selected) {
+                if (sequence.selected || renderer.config.allSequences) {
                     if (!sequence.blocks) {
                         sequence.blocks = [];
                     }
@@ -77,7 +77,7 @@ export default class PerfMainDocument extends JsonMainDocument {
             () => true,
             (renderer, context, data) => {
                 const sequence = this.outputSequence(renderer, context);
-                if (sequence.selected) {
+                if (sequence.selected || renderer.config.allSequences) {
                     if (!sequence.blocks) {
                         sequence.blocks = [];
                     }
@@ -100,7 +100,7 @@ export default class PerfMainDocument extends JsonMainDocument {
             () => true,
             (renderer, context, data) => {
                 const sequence = this.outputSequence(renderer, context);
-                if (sequence.selected) {
+                if (sequence.selected || renderer.config.allSequences) {
                     const tokenValue =
                         ["lineSpace", "eol"].includes(data.subType) ?
                             " " :
@@ -115,7 +115,7 @@ export default class PerfMainDocument extends JsonMainDocument {
             (context, data) => data.subType === 'start' && data.payload.startsWith('chapter/'),
             (renderer, context, data) => {
                 const sequence = this.outputSequence(renderer, context);
-                if (sequence.selected) {
+                if (sequence.selected || renderer.config.allSequences) {
                     this.lastBlock(renderer, context).content.push({
                         type: "chapter",
                         number: `${data.payload.split('/')[1]}`
@@ -129,7 +129,7 @@ export default class PerfMainDocument extends JsonMainDocument {
             (context, data) => data.subType === 'start' && data.payload.startsWith('verses/'),
             (renderer, context, data) => {
                 const sequence = this.outputSequence(renderer, context);
-                if (sequence.selected) {
+                if (sequence.selected || renderer.config.allSequences) {
                     this.lastBlock(renderer, context).content.push({
                         type: "verses",
                         number: `${data.payload.split('/')[1]}`
@@ -143,7 +143,7 @@ export default class PerfMainDocument extends JsonMainDocument {
             (context, data) => true,
             (renderer, context, data) => {
                 const sequence = this.outputSequence(renderer, context);
-                if (sequence.selected) {
+                if (sequence.selected || renderer.config.allSequences) {
                     this.currentBlockContext(renderer, context).push(
                         {
                             type: "graft",
