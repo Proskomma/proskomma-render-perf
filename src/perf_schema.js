@@ -14,6 +14,7 @@ export default ({
                     enum: [
                         "verses",
                         "xref",
+                        "footnote",
                         "noteCaller",
                     ],
                 },
