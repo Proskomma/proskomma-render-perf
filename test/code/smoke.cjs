@@ -50,7 +50,7 @@ test(
             pk.importDocuments({org: 'bcs', lang: 'hi', abbr: 'irv'}, 'usfm', [usfm]);
             const config = {
                 selectedSequenceId: null,
-                allSequences: false,
+                allSequences: true,
                 output: {
                     docSets: {},
                 }

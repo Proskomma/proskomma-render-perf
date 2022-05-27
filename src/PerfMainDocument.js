@@ -90,7 +90,7 @@ export default class PerfMainDocument extends JsonMainDocument {
                             content: [],
                         })
                     }
-                    sequence.blocks[sequence.blocks.length - 1].subType = context.sequenceStack[0].block.blockScope.split('/')[1] || data.bs.payload;
+                    sequence.blocks[sequence.blocks.length - 1].subType = context.sequenceStack[0].block.blockScope.split('/')[1] || context.sequenceStack[0].block.blockScope;
                     sequence.blocks[sequence.blocks.length - 1].content.push("");
                 }
             }

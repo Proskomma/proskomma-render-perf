@@ -1,6 +1,6 @@
 {
   "name": "proskomma-render-perf",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A Proskomma renderer to produce Proskomma Editor-Ready Format JSON (PERF)",
   "main": "dist/index.js",
   "scripts": {
@@ -25,7 +25,7 @@
     "@babel/core": "^7.17.10",
     "ajv": "^8.11.0",
     "proskomma-render": "^0.6.0",
-    "proskomma-render-json": "0.0.5"
+    "proskomma-render-json": "0.0.7"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.10",
