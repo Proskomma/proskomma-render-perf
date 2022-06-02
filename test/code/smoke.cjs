@@ -32,7 +32,7 @@ test(
                 [documentId],
             );
             t.equal(config2.validationErrors, null);
-            // console.log(JSON.stringify(config2.output.docSets["eBible/fra_fraLSG"].documents["JON"].sequences, null, 2));
+            // console.log(JSON.stringify(config2.output.docSets["eBible/fra_fraLSG"].documents["JON"], null, 2));
             // console.log(config2.validationErrors);
         } catch (err) {
             console.log(err);
