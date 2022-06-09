@@ -1,163 +1,130 @@
-import {JsonMainDocument} from 'proskomma-render-json';
+import {ScriptureParaDocument} from 'proskomma-render';
 
-export default class PerfMainDocument extends JsonMainDocument {
+export default class PerfMainDocument extends ScriptureParaDocument {
 
     constructor(result, context, config) {
         super(result, context, config);
-        this.awaitingNewBlock = [];
         this.addLocalActions();
-    }
-
-    outputSequence(renderer, context) {
-        return renderer.config.output
-            .docSets[renderer.docSetModel.appData.currentDocSetId]
-            .documents[context.document.headers.bookCode]
-            .sequences[context.sequenceStack[0].id]
-    }
-
-    sequenceById(renderer, context, seqId) {
-        return renderer.config.output
-            .docSets[renderer.docSetModel.appData.currentDocSetId]
-            .documents[context.document.headers.bookCode]
-            .sequences[seqId]
-    }
-
-    lastBlock(renderer, context) {
-        const sequence = this.outputSequence(renderer, context);
-        return sequence.blocks[sequence.blocks.length - 1];
-    }
-
-    currentBlockContext(renderer, context) {
-        const cbt1 = (arr) => {
-            const lastElement = arr[arr.length - 1];
-            if ((typeof lastElement) === 'string') {
-                return arr;
-            } else {
-                return cbt1(lastElement.content);
-            }
-        }
-        return cbt1(this.lastBlock(renderer, context).content);
     }
 
     addLocalActions() {
         this.addAction(
-            'blockGraft',
+            'startDocument',
             () => true,
             (renderer, context, data) => {
-                const sequence = this.outputSequence(renderer, context);
-                if (sequence.selected || renderer.config.allSequences) {
-                    if (!sequence.blocks) {
-                        sequence.blocks = [];
-                    }
-                    if (
-                        sequence.blocks.length === 0 ||
-                        sequence.blocks[sequence.blocks.length - 1].subType !== 'hangingGraft'
-                    ) {
-                        sequence.blocks.push({});
-                    }
-                    sequence.blocks[sequence.blocks.length - 1].type = "graft";
-                    sequence.blocks[sequence.blocks.length - 1].subType = data.subType;
-                    sequence.blocks[sequence.blocks.length - 1].target = data.payload;
-                    sequence.blocks[sequence.blocks.length - 1].nBlocks = this.sequenceById(renderer, context, data.payload).nBlocks;
-                    sequence.blocks[sequence.blocks.length - 1].previewText = this.sequenceById(renderer, context, data.payload).previewText;
-                    sequence.blocks[sequence.blocks.length - 1].firstBlockScope = this.sequenceById(renderer, context, data.payload).firstBlockScope;
-                    delete sequence.blocks[sequence.blocks.length - 1].content;
-                    sequence.blocks.push(
-                        {
-                            type: "block",
-                            subType: "hangingGraft",
-                            content: [""],
+                const docSetContext = this.docSetModel.context.docSet;
+                this.config.documents[context.document.id] = {
+                    "schema": {
+                        "structure": "flat",
+                        "structureVersion": "0.1.0",
+                        "constraints": [
+                            {
+                                "name": "perf",
+                                "version": "0.1.0"
+                            }
+                        ]
+                    },
+                    "metadata": {
+                        "translation": {
+                            "id": docSetContext.id,
+                            "selectors": docSetContext.selectors,
+                            "tags": docSetContext.tags,
+                        },
+                        "document": {
+                            "tags": [],
                         }
+                    },
+                    "sequences": {},
+                };
+                Object.entries(context.document.headers)
+                    .forEach(
+                        ([k, v]) =>
+                            this.config.documents[context.document.id].metadata.document[k] = v
                     );
+            });
+
+        this.addAction(
+            'startSequence',
+            () => true,
+            (renderer, context, data) => {
+                this.config.documents[context.document.id].sequences[data.id] = {
+                    type: data.type,
+                    blocks: [],
+                };
+                if (data.type === 'main') {
+                    this.config.documents[context.document.id].mainSequenceId = data.id;
                 }
             }
         );
+
         this.addAction(
             'startItems',
             () => true,
             (renderer, context, data) => {
-                const sequence = this.outputSequence(renderer, context);
-                if (sequence.selected || renderer.config.allSequences) {
-                    if (!sequence.blocks) {
-                        sequence.blocks = [];
+                this.config.documents[context.document.id]
+                    .sequences[context.sequenceStack[0].id]
+                    .blocks.push(
+                    {
+                        type: "paragraph",
+                        subType: `usfm:${context.sequenceStack[0].block.blockScope.split('/')[1] || context.sequenceStack[0].block.blockScope}`,
+                        content: [],
                     }
-                    if (
-                        sequence.blocks.length === 0 ||
-                        sequence.blocks[sequence.blocks.length - 1].subType !== 'hangingGraft'
-                    ) {
-                        sequence.blocks.push({
-                            type: "block",
-                            content: [],
-                        })
-                    }
-                    sequence.blocks[sequence.blocks.length - 1].subType = context.sequenceStack[0].block.blockScope.split('/')[1] || context.sequenceStack[0].block.blockScope;
-                    sequence.blocks[sequence.blocks.length - 1].content.push("");
-                }
+                );
             }
         );
+
+        this.addAction(
+            'blockGraft',
+            () => true,
+            (renderer, context, data) => {
+                this.config.documents[context.document.id]
+                    .sequences[context.sequenceStack[0].id]
+                    .blocks.push(
+                    {
+                        type: "graft",
+                        subType: data.subType,
+                        target: data.payload,
+                    }
+                );
+                this.renderSequenceId(data.payload);
+            }
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'start' && (data.payload.startsWith('chapter') || data.payload.startsWith('verses')),
+            (renderer, context, data) => {
+                const blocks = this.config.documents[context.document.id]
+                    .sequences[context.sequenceStack[0].id]
+                    .blocks;
+                const content = blocks[blocks.length - 1].content;
+                content.push({
+                    type: 'mark',
+                    subType: data.payload.split('/')[0],
+                    atts: {
+                        number: `${data.payload.split('/')[1]}`
+                    }
+                })
+            }
+        );
+
         this.addAction(
             'token',
             () => true,
             (renderer, context, data) => {
-                const sequence = this.outputSequence(renderer, context);
-                if (sequence.selected || renderer.config.allSequences) {
-                    const tokenValue =
-                        ["lineSpace", "eol"].includes(data.subType) ?
-                            " " :
-                            data.payload;
-                    const cbt = this.currentBlockContext(renderer, context);
-                    cbt[cbt.length - 1] += tokenValue;
-                }
-            }
-        );
-        this.addAction(
-            'scope',
-            (context, data) => data.subType === 'start' && data.payload.startsWith('chapter/'),
-            (renderer, context, data) => {
-                const sequence = this.outputSequence(renderer, context);
-                if (sequence.selected || renderer.config.allSequences) {
-                    this.lastBlock(renderer, context).content.push({
-                        type: "chapter",
-                        number: `${data.payload.split('/')[1]}`
-                    });
-                    this.lastBlock(renderer, context).content.push("");
-                }
-            }
-        );
-        this.addAction(
-            'scope',
-            (context, data) => data.subType === 'start' && data.payload.startsWith('verses/'),
-            (renderer, context, data) => {
-                const sequence = this.outputSequence(renderer, context);
-                if (sequence.selected || renderer.config.allSequences) {
-                    this.lastBlock(renderer, context).content.push({
-                        type: "verses",
-                        number: `${data.payload.split('/')[1]}`
-                    });
-                    this.lastBlock(renderer, context).content.push("");
-                }
-            }
-        );
-        this.addAction(
-            'inlineGraft',
-            (context, data) => true,
-            (renderer, context, data) => {
-                const sequence = this.outputSequence(renderer, context);
-                if (sequence.selected || renderer.config.allSequences) {
-                    this.currentBlockContext(renderer, context).push(
-                        {
-                            type: "graft",
-                            subType: data.subType,
-                            target: data.payload,
-                            nBlocks: this.sequenceById(renderer, context, data.payload).nBlocks,
-                            previewText: this.sequenceById(renderer, context, data.payload).previewText,
-                        },
-                        ""
-                    );
+                const chars = ['lineSpace', 'eol'].includes(data.subType) ? ' ' : data.payload;
+                const blocks = this.config.documents[context.document.id]
+                    .sequences[context.sequenceStack[0].id]
+                    .blocks;
+                const content = blocks[blocks.length - 1].content;
+                const lastItem = content[content.length - 1];
+                if (lastItem && typeof lastItem === 'string') {
+                    content[content.length - 1] = lastItem + chars;
+                } else {
+                    content.push(chars);
                 }
             }
         );
     }
-
 
 }

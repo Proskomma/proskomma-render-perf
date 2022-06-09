@@ -1,10 +1,20 @@
-const test = require('tape');
-const path = require('path');
-const fse = require('fs-extra');
-const {UWProskomma} = require('uw-proskomma');
+import test from 'tape';
+import path from 'path';
+import fse from 'fs-extra';
+import {UWProskomma} from 'uw-proskomma';
 import {doRender} from '../../src';
 
 const testGroup = 'Smoke';
+
+const invalidDocs = (validations) => {
+    const ret = {};
+    for (const [docId, doc] of Object.entries(validations)) {
+        if (!doc.isValid) {
+            ret[docId] = doc;
+        }
+    }
+    return ret;
+}
 
 test(
     `From Succinct (${testGroup})`,
@@ -17,9 +27,6 @@ test(
             const config = {
                 selectedSequenceId: null,
                 allSequences: false,
-                output: {
-                    docSets: {},
-                }
             };
             const query = '{docSets { id documents {id bookCode: header(id:"bookCode")} } }';
             const gqlResult = pk.gqlQuerySync(query);
@@ -31,9 +38,8 @@ test(
                 [docSetId],
                 [documentId],
             );
-            t.equal(config2.validationErrors, null);
-            // console.log(JSON.stringify(config2.output.docSets["eBible/fra_fraLSG"].documents["JON"], null, 2));
-            // console.log(config2.validationErrors);
+            // console.log(JSON.stringify(config2.documents, null, 2));
+            t.deepEqual(invalidDocs(config2.validations), {});
         } catch (err) {
             console.log(err);
         }
@@ -65,7 +71,7 @@ test(
                 [docSetId],
                 [documentId],
             );
-            t.equal(config2.validationErrors, null);
+            t.deepEqual(invalidDocs(config2.validations), {});
             // console.log(JSON.stringify(config2.output.docSets["bcs/hi_irv"].documents["REV"].sequences, null, 2));
             // console.log(config2.validationErrors);
         } catch (err) {

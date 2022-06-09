@@ -4,7 +4,7 @@ import {
 } from "proskomma-render";
 import PerfMainDocSet from './PerfMainDocSet';
 import PerfMainDocument from './PerfMainDocument';
-import validator from './validator';
+import {Validator} from 'proskomma-json-tools';
 
 const doRender = async (pk, config, docSetIds, documentIds) => {
     const doMainRender = (config, result) => {
@@ -14,8 +14,13 @@ const doRender = async (pk, config, docSetIds, documentIds) => {
         const model = new ScriptureParaModel(result, config);
         model.addDocSetModel('default', dsModel);
         model.render();
-        model.config.isValid = validator(config.output);
-        model.config.validationErrors = validator.errors;
+        const validator = new Validator();
+        const validations = {};
+        Object.entries(config.documents)
+            .forEach(
+                ([dId, doc]) =>
+                    validations[dId] = validator.validate('constraint', 'perfDocument', '0.1.0', doc));
+        model.config.validations = validations;
         return model.config;
     }
     const thenFunction = result => {
