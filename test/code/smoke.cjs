@@ -40,7 +40,7 @@ test(
             );
             // const resultDocument = Object.values(config2.documents)[0];
             // console.log(JSON.stringify(config2.validations, null, 2));
-            // console.log(JSON.stringify(resultDocument.sequences[resultDocument.main_sequence_id], null, 2));
+            /// console.log(JSON.stringify(resultDocument.sequences[resultDocument.main_sequence_id], null, 2));
             t.deepEqual(invalidDocs(config2.validations), {});
         } catch (err) {
             console.log(err);

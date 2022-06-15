@@ -48,8 +48,10 @@ export default class PerfMainDocument extends ScriptureParaDocument {
             const lastItem = content[content.length - 1];
             if (typeof lastItem === "string") {
                 return null;
-            } else if (lastItem.content && lastItem.content.length > 0) {
-                if (typeof lastItem.content[lastItem.content.length - 1] === "string") {
+            } else if (lastItem.content) {
+                if (lastItem.content.length == 0) {
+                    return content;
+                } else if (typeof lastItem.content[lastItem.content.length - 1] === "string") {
                     return content;
                 } else {
                     return this.lastContainerParent(lastItem.content);
@@ -164,15 +166,13 @@ export default class PerfMainDocument extends ScriptureParaDocument {
             () => true,
             (renderer, context, data) => {
                 const content = this.lastContainer(this.currentLastBlock(context).content);
-                /*
                 content.push(
                     {
                         type: "graft",
-                        sub_type: camelCaseToSnakeCase(data.subType),
+                        sub_type: camelCase2snakeCase(data.subType),
                         target: data.payload,
                     }
                 );
-                 */
                 this.renderSequenceId(data.payload);
             }
         );
@@ -211,6 +211,79 @@ export default class PerfMainDocument extends ScriptureParaDocument {
             (renderer, context, data) => {
                 const content = this.lastContainerParent(this.currentLastBlock(context).content);
                 content.push("");
+            }
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'start' && data.payload.startsWith("spanWithAtts/"),
+            (renderer, context, data) => {
+                const content = this.lastContainer(this.currentLastBlock(context).content);
+                content.push({
+                    type: "wrapper",
+                    sub_type: `usfm:${data.payload.split('/')[1]}`,
+                    content: [],
+                    atts: {},
+                });
+            }
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'end' && data.payload.startsWith("spanWithAtts/"),
+            (renderer, context, data) => {
+                const content = this.lastContainerParent(this.currentLastBlock(context).content);
+                content.push("");
+            }
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'start' && data.payload.startsWith("milestone/"),
+            (renderer, context, data) => {
+                const content = this.lastContainer(this.currentLastBlock(context).content);
+                content.push({
+                    type: "start_milestone",
+                    sub_type: `usfm:${data.payload.split('/')[1]}`,
+                    atts: {},
+                });
+            }
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'end' && data.payload.startsWith("milestone/"),
+            (renderer, context, data) => {
+                const content = this.lastContainer(this.currentLastBlock(context).content);
+                content.push({
+                    type: "end_milestone",
+                    sub_type: `usfm:${data.payload.split('/')[1]}`,
+                });
+            }
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'start' && data.payload.startsWith("attribute/"),
+            (renderer, context, data) => {
+                const attBits = data.payload.split('/');
+                const milestoneType = attBits[1];
+                const attKey = attBits[3];
+                const attValue = attBits[5];
+                let content;
+                if (milestoneType === 'spanWithAtts') {
+                    content = this.lastContainerParent(this.currentLastBlock(context).content);
+                } else {
+                    content = this.lastContainer(this.currentLastBlock(context).content);
+                }
+                if (content.length === 0 || typeof content[content.length - 1] === 'string' || !content[content.length - 1].atts) {
+                    throw new Error(`Could not add attribute to ${content[content.length - 1]}`);
+                }
+                if (attKey in content[content.length - 1].atts) {
+                    content[content.length - 1].atts[attKey].push(attValue);
+                } else {
+                    content[content.length - 1].atts[attKey] = [attValue];
+                }
             }
         );
 
