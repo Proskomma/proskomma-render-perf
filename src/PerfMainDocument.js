@@ -1,5 +1,6 @@
 import {ScriptureParaDocument} from 'proskomma-render';
 import {usfmHelps} from 'proskomma-json-tools';
+import {camelCase2snakeCase} from './changeCase';
 
 export default class PerfMainDocument extends ScriptureParaDocument {
 
@@ -111,7 +112,7 @@ export default class PerfMainDocument extends ScriptureParaDocument {
             () => true,
             (renderer, context, data) => {
                 this.config.documents[context.document.id].sequences[data.id] = {
-                    type: data.type,
+                    type: camelCase2snakeCase(data.type),
                     blocks: [],
                 };
                 if (data.type === 'main') {
@@ -150,10 +151,28 @@ export default class PerfMainDocument extends ScriptureParaDocument {
                 this.currentBlocks(context).push(
                     {
                         type: "graft",
-                        sub_type: data.subType,
+                        sub_type: camelCase2snakeCase(data.subType),
                         target: data.payload,
                     }
                 );
+                this.renderSequenceId(data.payload);
+            }
+        );
+
+        this.addAction(
+            'inlineGraft',
+            () => true,
+            (renderer, context, data) => {
+                const content = this.lastContainer(this.currentLastBlock(context).content);
+                /*
+                content.push(
+                    {
+                        type: "graft",
+                        sub_type: camelCaseToSnakeCase(data.subType),
+                        target: data.payload,
+                    }
+                );
+                 */
                 this.renderSequenceId(data.payload);
             }
         );
