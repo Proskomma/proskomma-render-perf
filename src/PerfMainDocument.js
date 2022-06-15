@@ -1,4 +1,5 @@
 import {ScriptureParaDocument} from 'proskomma-render';
+import {usfmHelps} from 'proskomma-json-tools';
 
 export default class PerfMainDocument extends ScriptureParaDocument {
 
@@ -78,11 +79,11 @@ export default class PerfMainDocument extends ScriptureParaDocument {
                 this.config.documents[context.document.id] = {
                     "schema": {
                         "structure": "flat",
-                        "structureVersion": "0.1.0",
+                        "structure_version": "0.2.0",
                         "constraints": [
                             {
                                 "name": "perf",
-                                "version": "0.1.0"
+                                "version": "0.2.0"
                             }
                         ]
                     },
@@ -114,7 +115,7 @@ export default class PerfMainDocument extends ScriptureParaDocument {
                     blocks: [],
                 };
                 if (data.type === 'main') {
-                    this.config.documents[context.document.id].mainSequenceId = data.id;
+                    this.config.documents[context.document.id].main_sequence_id = data.id;
                 }
             }
         );
@@ -126,7 +127,7 @@ export default class PerfMainDocument extends ScriptureParaDocument {
                 this.currentBlocks(context).push(
                     {
                         type: "paragraph",
-                        subType: `usfm:${context.sequenceStack[0].block.blockScope.split('/')[1] || context.sequenceStack[0].block.blockScope}`,
+                        sub_type: `usfm:${context.sequenceStack[0].block.blockScope.split('/')[1] || context.sequenceStack[0].block.blockScope}`,
                         content: [""],
                     }
                 );
@@ -149,7 +150,7 @@ export default class PerfMainDocument extends ScriptureParaDocument {
                 this.currentBlocks(context).push(
                     {
                         type: "graft",
-                        subType: data.subType,
+                        sub_type: data.subType,
                         target: data.payload,
                     }
                 );
@@ -164,7 +165,7 @@ export default class PerfMainDocument extends ScriptureParaDocument {
                 const content = this.lastContainer(this.currentLastBlock(context).content);
                 content.push({
                     type: 'mark',
-                    subType: data.payload.split('/')[0],
+                    sub_type: data.payload.split('/')[0],
                     atts: {
                         number: `${data.payload.split('/')[1]}`
                     }
@@ -174,12 +175,12 @@ export default class PerfMainDocument extends ScriptureParaDocument {
 
         this.addAction(
             'scope',
-            (context, data) => data.subType === 'start' && data.payload.startsWith("span/") && ["wj"].includes(data.payload.split('/')[1]),
+            (context, data) => data.subType === 'start' && data.payload.startsWith("span/") && usfmHelps.characterTags.includes(data.payload.split('/')[1]),
             (renderer, context, data) => {
                 const content = this.lastContainer(this.currentLastBlock(context).content);
                 content.push({
                     type: "wrapper",
-                    subType: `usfm:${data.payload.split('/')[1]}`,
+                    sub_type: `usfm:${data.payload.split('/')[1]}`,
                     content: [],
                 });
             }
@@ -187,7 +188,7 @@ export default class PerfMainDocument extends ScriptureParaDocument {
 
         this.addAction(
             'scope',
-            (context, data) => data.subType === 'end' && data.payload.startsWith("span/") && ["wj"].includes(data.payload.split('/')[1]),
+            (context, data) => data.subType === 'end' && data.payload.startsWith("span/") && usfmHelps.characterTags.includes(data.payload.split('/')[1]),
             (renderer, context, data) => {
                 const content = this.lastContainerParent(this.currentLastBlock(context).content);
                 content.push("");

@@ -19,7 +19,7 @@ const doRender = async (pk, config, docSetIds, documentIds) => {
         Object.entries(config.documents)
             .forEach(
                 ([dId, doc]) =>
-                    validations[dId] = validator.validate('constraint', 'perfDocument', '0.1.0', doc));
+                    validations[dId] = validator.validate('constraint', 'perfDocument', '0.2.0', doc));
         model.config.validations = validations;
         return model.config;
     }
