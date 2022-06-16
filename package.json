@@ -1,6 +1,6 @@
 {
   "name": "proskomma-render-perf",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A Proskomma renderer to produce Proskomma Editor-Ready Format JSON (PERF)",
   "main": "dist/index.js",
   "scripts": {
@@ -37,6 +37,6 @@
     "path": "^0.12.7",
     "tap-summary": "^4.0.0",
     "tape": "^5.5.3",
-    "uw-proskomma": "^0.8.2"
+    "uw-proskomma": "^0.8.4"
   }
 }
