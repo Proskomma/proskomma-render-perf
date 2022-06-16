@@ -94,19 +94,42 @@ export default class PerfMainDocument extends ScriptureParaDocument {
                         "translation": {
                             "id": docSetContext.id,
                             "selectors": docSetContext.selectors,
-                            "tags": docSetContext.tags,
+                            "tags": [],
+                            "properties": {},
                         },
                         "document": {
                             "tags": [],
+                            "properties": {},
                         }
                     },
                     "sequences": {},
                 };
+                docSetContext.tags.forEach(
+                    t => {
+                        if (t.includes(':')) {
+                            const [k, v] = t.split(':');
+                            this.config.documents[context.document.id].metadata.translation.properties[k] = v;
+                        } else {
+                            this.config.documents[context.document.id].metadata.translation.tags.push(t);
+                        }
+                    }
+                )
+                context.document.tags.forEach(
+                    t => {
+                        if (t.includes(':')) {
+                            const [k, v] = t.split(':');
+                            this.config.documents[context.document.id].metadata.document.properties[k] = v;
+                        } else {
+                            this.config.documents[context.document.id].metadata.document.tags.push(t);
+                        }
+                    }
+                )
                 Object.entries(context.document.headers)
                     .forEach(
                         ([k, v]) =>
                             this.config.documents[context.document.id].metadata.document[k] = v
                     );
+
             });
 
         this.addAction(
