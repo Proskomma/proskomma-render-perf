@@ -2,10 +2,15 @@ import {ScriptureParaDocument} from 'proskomma-render';
 import {usfmHelps} from 'proskomma-json-tools';
 import {camelCase2snakeCase} from './changeCase';
 
-export default class PerfMainDocument extends ScriptureParaDocument {
+export default class SofriaMainDocument extends ScriptureParaDocument {
 
     constructor(result, context, config) {
         super(result, context, config);
+        this.status = {
+            currentChapter: null,
+            currentVerses: null,
+            currentSpans: [],
+        }
         this.addLocalActions();
     }
 
@@ -81,11 +86,11 @@ export default class PerfMainDocument extends ScriptureParaDocument {
                 const docSetContext = this.docSetModel.context.docSet;
                 this.config.documents[context.document.id] = {
                     "schema": {
-                        "structure": "flat",
+                        "structure": "nested",
                         "structure_version": "0.2.0",
                         "constraints": [
                             {
-                                "name": "perf",
+                                "name": "sofria",
                                 "version": "0.2.0",
                             }
                         ]
@@ -157,6 +162,17 @@ export default class PerfMainDocument extends ScriptureParaDocument {
                         content: [""],
                     }
                 );
+                if (this.status.currentChapter) {
+                    const content = this.currentLastBlock(context).content;
+                    content.push({
+                        type: 'wrapper',
+                        sub_type: "chapter",
+                        atts: {
+                            number: this.status.currentChapter
+                        },
+                        content: []
+                    })
+                }
             }
         );
 
@@ -170,49 +186,60 @@ export default class PerfMainDocument extends ScriptureParaDocument {
         );
 
         this.addAction(
-            'blockGraft',
-            () => true,
+            'scope',
+            (context, data) => data.subType === 'start' && data.payload.startsWith('chapter'),
             (renderer, context, data) => {
-                this.currentBlocks(context).push(
-                    {
-                        type: "graft",
-                        sub_type: camelCase2snakeCase(data.subType),
-                        target: data.payload,
-                    }
-                );
-                this.renderSequenceId(data.payload);
-            }
-        );
-
-        this.addAction(
-            'inlineGraft',
-            () => true,
-            (renderer, context, data) => {
-                const content = this.lastContainer(this.currentLastBlock(context).content);
-                content.push(
-                    {
-                        type: "graft",
-                        sub_type: camelCase2snakeCase(data.subType),
-                        target: data.payload,
-                    }
-                );
-                this.renderSequenceId(data.payload);
+                this.status.currentChapter = data.payload.split('/')[1];
+                const content = this.currentLastBlock(context).content;
+                content.push({
+                    type: 'wrapper',
+                    sub_type: "chapter",
+                    atts: {
+                        number: this.status.currentChapter
+                    },
+                    content: []
+                })
             }
         );
 
         this.addAction(
             'scope',
-            (context, data) => data.subType === 'start' && (data.payload.startsWith('chapter') || data.payload.startsWith('verses')),
+            (context, data) => data.subType === 'end' && data.payload.startsWith('chapter'),
             (renderer, context, data) => {
+                this.status.currentChapter = null;
+                const content = this.currentLastBlock(context).content;
+                content.push("");
+            }
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'start' && data.payload.startsWith('verses'),
+            (renderer, context, data) => {
+                this.status.currentVerses = data.payload.split('/')[1];
                 const content = this.lastContainer(this.currentLastBlock(context).content);
                 content.push({
-                    type: 'mark',
-                    sub_type: data.payload.split('/')[0],
+                    type: 'wrapper',
+                    sub_type: "verses",
                     atts: {
-                        number: `${data.payload.split('/')[1]}`
-                    }
+                        number: this.status.currentVerses
+                    },
+                    content: []
                 })
+                for (const spanObject of this.status.currentSpans){
+                    const content = this.lastContainer(this.currentLastBlock(context).content);
+                    content.push(spanObject);
+                }
+            }
+        );
 
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'end' && data.payload.startsWith('verses'),
+            (renderer, context, data) => {
+                this.status.currentVerses = null;
+                const content = this.lastContainerParent(this.currentLastBlock(context).content);
+                content.push("");
             }
         );
 
@@ -220,12 +247,14 @@ export default class PerfMainDocument extends ScriptureParaDocument {
             'scope',
             (context, data) => data.subType === 'start' && data.payload.startsWith("span/") && usfmHelps.characterTags.includes(data.payload.split('/')[1]),
             (renderer, context, data) => {
-                const content = this.lastContainer(this.currentLastBlock(context).content);
-                content.push({
+                const wrapper = {
                     type: "wrapper",
                     sub_type: `usfm:${data.payload.split('/')[1]}`,
                     content: [],
-                });
+                };
+                this.status.currentSpans.push(wrapper);
+                const content = this.lastContainer(this.currentLastBlock(context).content);
+                content.push(wrapper);
             }
         );
 
@@ -233,100 +262,9 @@ export default class PerfMainDocument extends ScriptureParaDocument {
             'scope',
             (context, data) => data.subType === 'end' && data.payload.startsWith("span/") && usfmHelps.characterTags.includes(data.payload.split('/')[1]),
             (renderer, context, data) => {
+                this.status.currentSpans.pop();
                 const content = this.lastContainerParent(this.currentLastBlock(context).content);
                 content.push("");
-            }
-        );
-
-        this.addAction(
-            'scope',
-            (context, data) => data.subType === 'start' && data.payload.startsWith("spanWithAtts/"),
-            (renderer, context, data) => {
-                const content = this.lastContainer(this.currentLastBlock(context).content);
-                content.push({
-                    type: "wrapper",
-                    sub_type: `usfm:${data.payload.split('/')[1]}`,
-                    content: [],
-                    atts: {},
-                });
-            }
-        );
-
-        this.addAction(
-            'scope',
-            (context, data) => data.subType === 'end' && data.payload.startsWith("spanWithAtts/"),
-            (renderer, context, data) => {
-                const content = this.lastContainerParent(this.currentLastBlock(context).content);
-                content.push("");
-            }
-        );
-
-        this.addAction(
-            'scope',
-            (context, data) => data.subType === 'start' && data.payload.startsWith("milestone/") && data.payload.split('/')[1] === 'ts',
-            (renderer, context, data) => {
-                const content = this.lastContainer(this.currentLastBlock(context).content);
-                content.push({
-                    type: "mark",
-                    sub_type: `usfm:ts`,
-                    atts: {},
-                });
-            }
-        );
-
-        this.addAction(
-            'scope',
-            (context, data) => data.subType === 'end' && data.payload.startsWith("milestone/") && data.payload.split('/')[1] === 'ts',
-            (renderer, context, data) => {},
-        );
-
-        this.addAction(
-            'scope',
-            (context, data) => data.subType === 'start' && data.payload.startsWith("milestone/"),
-            (renderer, context, data) => {
-                const content = this.lastContainer(this.currentLastBlock(context).content);
-                content.push({
-                    type: "start_milestone",
-                    sub_type: `usfm:${data.payload.split('/')[1]}`,
-                    atts: {},
-                });
-            }
-        );
-
-        this.addAction(
-            'scope',
-            (context, data) => data.subType === 'end' && data.payload.startsWith("milestone/"),
-            (renderer, context, data) => {
-                const content = this.lastContainer(this.currentLastBlock(context).content);
-                content.push({
-                    type: "end_milestone",
-                    sub_type: `usfm:${data.payload.split('/')[1]}`,
-                });
-            }
-        );
-
-        this.addAction(
-            'scope',
-            (context, data) => data.subType === 'start' && data.payload.startsWith("attribute/"),
-            (renderer, context, data) => {
-                const attBits = data.payload.split('/');
-                const milestoneType = attBits[1];
-                const attKey = attBits[3];
-                const attValue = attBits[5];
-                let content;
-                if (milestoneType === 'spanWithAtts') {
-                    content = this.lastContainerParent(this.currentLastBlock(context).content);
-                } else {
-                    content = this.lastContainer(this.currentLastBlock(context).content);
-                }
-                if (content.length === 0 || typeof content[content.length - 1] === 'string' || !content[content.length - 1].atts) {
-                    throw new Error(`Could not add attribute to ${content[content.length - 1]}`);
-                }
-                if (attKey in content[content.length - 1].atts) {
-                    content[content.length - 1].atts[attKey].push(attValue);
-                } else {
-                    content[content.length - 1].atts[attKey] = [attValue];
-                }
             }
         );
 

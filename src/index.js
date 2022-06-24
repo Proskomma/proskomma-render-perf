@@ -2,14 +2,15 @@ import {
     ScriptureParaModel,
     ScriptureParaModelQuery,
 } from "proskomma-render";
-import PerfMainDocSet from './PerfMainDocSet';
+import JsonMainDocSet from './JsonMainDocSet';
 import PerfMainDocument from './PerfMainDocument';
+import SofriaMainDocument from './SofriaMainDocument';
 import {Validator} from 'proskomma-json-tools';
 
 const doRender = async (pk, config, docSetIds, documentIds) => {
     const doMainRender = (config, result) => {
-        const dModel = new PerfMainDocument(result, {}, config);
-        const dsModel = new PerfMainDocSet(result, {}, config);
+        const dModel = config.jsonType[0] === 'perf' ? new PerfMainDocument(result, {}, config): new SofriaMainDocument(result, {}, config);
+        const dsModel = new JsonMainDocSet(result, {}, config);
         dsModel.addDocumentModel('default', dModel);
         const model = new ScriptureParaModel(result, config);
         model.addDocSetModel('default', dsModel);
