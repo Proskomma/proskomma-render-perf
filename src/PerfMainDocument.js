@@ -262,6 +262,25 @@ export default class PerfMainDocument extends ScriptureParaDocument {
 
         this.addAction(
             'scope',
+            (context, data) => data.subType === 'start' && data.payload.startsWith("milestone/") && data.payload.split('/')[1] === 'ts',
+            (renderer, context, data) => {
+                const content = this.lastContainer(this.currentLastBlock(context).content);
+                content.push({
+                    type: "mark",
+                    sub_type: `usfm:ts`,
+                    atts: {},
+                });
+            }
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'end' && data.payload.startsWith("milestone/") && data.payload.split('/')[1] === 'ts',
+            (renderer, context, data) => {},
+        );
+
+        this.addAction(
+            'scope',
             (context, data) => data.subType === 'start' && data.payload.startsWith("milestone/"),
             (renderer, context, data) => {
                 const content = this.lastContainer(this.currentLastBlock(context).content);
