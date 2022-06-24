@@ -81,12 +81,12 @@ export default class PerfMainDocument extends ScriptureParaDocument {
                 const docSetContext = this.docSetModel.context.docSet;
                 this.config.documents[context.document.id] = {
                     "schema": {
-                        "structure": "flat",
+                        "structure": this.config.jsonType[0] === "perf" ? "flat" : "nested",
                         "structure_version": "0.2.0",
                         "constraints": [
                             {
-                                "name": "perf",
-                                "version": "0.2.0"
+                                "name": this.config.jsonType[0],
+                                "version": this.config.jsonType[1],
                             }
                         ]
                     },
@@ -212,6 +212,7 @@ export default class PerfMainDocument extends ScriptureParaDocument {
                         number: `${data.payload.split('/')[1]}`
                     }
                 })
+
             }
         );
 

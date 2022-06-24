@@ -4,7 +4,7 @@ import fse from 'fs-extra';
 import {UWProskomma} from 'uw-proskomma';
 import {doRender} from '../../src';
 
-const testGroup = 'Smoke';
+const testGroup = 'PERF Smoke';
 
 const invalidDocs = (validations) => {
     const ret = {};
@@ -25,8 +25,7 @@ test(
             const succinctJson = fse.readJsonSync(path.resolve(path.join(__dirname, '..', 'test_data', 'fra_lsg_succinct.json')));
             pk.loadSuccinctDocSet(succinctJson);
             const config = {
-                selectedSequenceId: null,
-                allSequences: false,
+                jsonType: ["perf", "0.2.0"],
             };
             const query = '{docSets { id documents {id bookCode: header(id:"bookCode")} } }';
             const gqlResult = pk.gqlQuerySync(query);
@@ -58,8 +57,7 @@ test(
             const usfm = fse.readFileSync(path.resolve(path.join(__dirname, '..', 'test_data', 'bcs-hi_irv.rev.usfm'))).toString();
             pk.importDocuments({org: 'bcs', lang: 'hi', abbr: 'irv'}, 'usfm', [usfm]);
             const config = {
-                selectedSequenceId: null,
-                allSequences: true,
+                jsonType: ["perf", "0.2.0"],
                 output: {
                     docSets: {},
                 }

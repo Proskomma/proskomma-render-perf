@@ -4,7 +4,7 @@ import fse from 'fs-extra';
 import {UWProskomma} from 'uw-proskomma';
 import {doRender} from '../../src';
 
-const testGroup = 'Milestones';
+const testGroup = 'PERF Milestones';
 
 const invalidDocs = (validations) => {
     const ret = {};
@@ -25,8 +25,7 @@ test(
             const usfm = fse.readFileSync(path.resolve(path.join(__dirname, '..', 'test_data', 'dcs-ult-tit.usfm'))).toString();
             pk.importDocuments({org: 'dcs', lang: 'en', abbr: 'ult'}, 'usfm', [usfm]);
             const config = {
-                selectedSequenceId: null,
-                allSequences: true,
+                jsonType: ["perf", "0.2.0"],
                 output: {
                     docSets: {},
                 }
