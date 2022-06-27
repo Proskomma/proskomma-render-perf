@@ -1,6 +1,7 @@
 import {ScriptureParaDocument} from 'proskomma-render';
 import {usfmHelps} from 'proskomma-json-tools';
 import {camelCase2snakeCase} from './changeCase';
+import {lastStringContainer, lastContainer, lastContainerParent} from './sharedDocument';
 
 export default class SofriaMainDocument extends ScriptureParaDocument {
 
@@ -15,56 +16,15 @@ export default class SofriaMainDocument extends ScriptureParaDocument {
     }
 
     lastStringContainer(content) {
-        if (content.length === 0) {
-            content.push("");
-            return content;
-        } else {
-            const lastItem = content[content.length - 1];
-            if (typeof lastItem === "string") {
-                return content;
-            } else if (lastItem.content) {
-                return this.lastStringContainer(lastItem.content);
-            } else {
-                content.push("");
-                return content;
-            }
-        }
+        return lastStringContainer(content);
     }
 
     lastContainer(content) {
-        if (content.length === 0) {
-            return content;
-        } else {
-            const lastItem = content[content.length - 1];
-            if (typeof lastItem === "string") {
-                return content;
-            } else if (lastItem.content) {
-                return this.lastContainer(lastItem.content);
-            } else {
-                return content;
-            }
-        }
+        return lastContainer(content);
     }
 
     lastContainerParent(content) {
-        if (content.length === 0) {
-            return null;
-        } else {
-            const lastItem = content[content.length - 1];
-            if (typeof lastItem === "string") {
-                return null;
-            } else if (lastItem.content) {
-                if (lastItem.content.length === 0) {
-                    return content;
-                } else if (typeof lastItem.content[lastItem.content.length - 1] === "string") {
-                    return content;
-                } else {
-                    return this.lastContainerParent(lastItem.content);
-                }
-            } else {
-                return null;
-            }
-        }
+        return lastContainerParent(content);
     }
 
     currentBlocks(context) {
