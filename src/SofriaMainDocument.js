@@ -1,9 +1,9 @@
 import {ScriptureParaDocument} from 'proskomma-render';
 import {usfmHelps} from 'proskomma-json-tools';
 import {camelCase2snakeCase} from './changeCase';
-import {lastStringContainer, lastContainer, lastContainerParent} from './sharedDocument';
+import {lastStringContainer, lastContainer, lastContainerParent, JsonMainDocument} from './sharedDocument';
 
-export default class SofriaMainDocument extends ScriptureParaDocument {
+export default class SofriaMainDocument extends JsonMainDocument {
 
     constructor(result, context, config) {
         super(result, context, config);
@@ -43,58 +43,8 @@ export default class SofriaMainDocument extends ScriptureParaDocument {
             'startDocument',
             () => true,
             (renderer, context, data) => {
-                const docSetContext = this.docSetModel.context.docSet;
-                this.config.documents[context.document.id] = {
-                    "schema": {
-                        "structure": "nested",
-                        "structure_version": "0.2.0",
-                        "constraints": [
-                            {
-                                "name": "sofria",
-                                "version": "0.2.0",
-                            }
-                        ]
-                    },
-                    "metadata": {
-                        "translation": {
-                            "id": docSetContext.id,
-                            "selectors": docSetContext.selectors,
-                            "tags": [],
-                            "properties": {},
-                        },
-                        "document": {
-                            "tags": [],
-                            "properties": {},
-                        }
-                    },
-                    "sequences": {},
-                };
-                docSetContext.tags.forEach(
-                    t => {
-                        if (t.includes(':')) {
-                            const [k, v] = t.split(':');
-                            this.config.documents[context.document.id].metadata.translation.properties[k] = v;
-                        } else {
-                            this.config.documents[context.document.id].metadata.translation.tags.push(t);
-                        }
-                    }
-                )
-                context.document.tags.forEach(
-                    t => {
-                        if (t.includes(':')) {
-                            const [k, v] = t.split(':');
-                            this.config.documents[context.document.id].metadata.document.properties[k] = v;
-                        } else {
-                            this.config.documents[context.document.id].metadata.document.tags.push(t);
-                        }
-                    }
-                )
-                Object.entries(context.document.headers)
-                    .forEach(
-                        ([k, v]) =>
-                            this.config.documents[context.document.id].metadata.document[k] = v
-                    );
-
+                this.setupDocuments(context, 'sofria', '0.2.0', '0.2.0');
+                this.config.documents[context.document.id].sequences = {}; // TEMPORARY
             });
 
         this.addAction(
@@ -133,15 +83,6 @@ export default class SofriaMainDocument extends ScriptureParaDocument {
                         content: []
                     })
                 }
-            }
-        );
-
-        this.addAction(
-            'endBlock',
-            () => true,
-            (renderer, context, data) => {
-                const lastBlock = this.currentLastBlock(context);
-                lastBlock.content = lastBlock.content.filter(i => i !== "");
             }
         );
 
@@ -232,10 +173,7 @@ export default class SofriaMainDocument extends ScriptureParaDocument {
             'token',
             () => true,
             (renderer, context, data) => {
-                const chars = ['lineSpace', 'eol'].includes(data.subType) ? ' ' : data.payload;
-                const content = this.currentLastBlock(context).content;
-                const lastStringContainer = this.lastStringContainer(content);
-                lastStringContainer[lastStringContainer.length - 1] = lastStringContainer[lastStringContainer.length - 1] + chars;
+                this.defaultToken(context, data);
             }
         );
     }

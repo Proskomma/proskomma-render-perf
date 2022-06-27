@@ -63,14 +63,6 @@ export default class PerfMainDocument extends JsonMainDocument {
         );
 
         this.addAction(
-            'endBlock',
-            () => true,
-            (renderer, context, data) => {
-                this.endBlock(context);
-           }
-        );
-
-        this.addAction(
             'blockGraft',
             () => true,
             (renderer, context, data) => {
