@@ -161,6 +161,60 @@ export default class SofriaMainDocument extends JsonMainDocument {
         );
 
         this.addAction(
+            'scope',
+            (context, data) => data.subType === 'start' && data.payload.startsWith("spanWithAtts/"),
+            (renderer, context, data) => {
+                this.startSpanWithAtts(context, data);
+            }
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'end' && data.payload.startsWith("spanWithAtts/"),
+            (renderer, context) => {
+                this.endSpanWithAtts(context);
+            }
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'start' && data.payload.startsWith("milestone/") && data.payload.split('/')[1] === 'ts',
+            (renderer, context, data) => {
+                this.emptyMilestone(context, 'ts');
+            }
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'end' && data.payload.startsWith("milestone/") && data.payload.split('/')[1] === 'ts',
+            (renderer, context, data) => {},
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'start' && data.payload.startsWith("milestone/"),
+            (renderer, context, data) => {
+                this.startMilestone(context, data);
+            }
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'end' && data.payload.startsWith("milestone/"),
+            (renderer, context, data) => {
+                this.endMilestone(context, data);
+            }
+        );
+
+        this.addAction(
+            'scope',
+            (context, data) => data.subType === 'start' && data.payload.startsWith("attribute/"),
+            (renderer, context, data) => {
+                this.startAttribute(context, data);
+            }
+        );
+
+        this.addAction(
             'token',
             () => true,
             (renderer, context, data) => {
