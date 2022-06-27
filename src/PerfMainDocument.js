@@ -6,6 +6,9 @@ export default class PerfMainDocument extends JsonMainDocument {
 
     constructor(result, context, config) {
         super(result, context, config);
+        this.status = {
+            currentSpans: [],
+        }
         this.addLocalActions();
     }
 

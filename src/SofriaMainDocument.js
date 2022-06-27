@@ -127,7 +127,7 @@ export default class SofriaMainDocument extends JsonMainDocument {
                     },
                     content: []
                 })
-                for (const spanObject of this.status.currentSpans){
+                for (const spanObject of this.status.currentSpans) {
                     const content = this.lastContainer(this.currentLastBlock(context).content);
                     content.push(spanObject);
                 }
@@ -148,14 +148,7 @@ export default class SofriaMainDocument extends JsonMainDocument {
             'scope',
             (context, data) => data.subType === 'start' && data.payload.startsWith("span/") && usfmHelps.characterTags.includes(data.payload.split('/')[1]),
             (renderer, context, data) => {
-                const wrapper = {
-                    type: "wrapper",
-                    sub_type: `usfm:${data.payload.split('/')[1]}`,
-                    content: [],
-                };
-                this.status.currentSpans.push(wrapper);
-                const content = this.lastContainer(this.currentLastBlock(context).content);
-                content.push(wrapper);
+                this.startSpan(context, data);
             }
         );
 
@@ -163,9 +156,7 @@ export default class SofriaMainDocument extends JsonMainDocument {
             'scope',
             (context, data) => data.subType === 'end' && data.payload.startsWith("span/") && usfmHelps.characterTags.includes(data.payload.split('/')[1]),
             (renderer, context, data) => {
-                this.status.currentSpans.pop();
-                const content = this.lastContainerParent(this.currentLastBlock(context).content);
-                content.push("");
+                this.endSpan(context);
             }
         );
 

@@ -127,15 +127,18 @@ class JsonMainDocument extends ScriptureParaDocument {
     }
 
     startSpan(context, data) {
-        const content = this.lastContainer(this.currentLastBlock(context).content);
-        content.push({
+        const wrapper = {
             type: "wrapper",
             sub_type: `usfm:${data.payload.split('/')[1]}`,
             content: [],
-        });
+        };
+        this.status.currentSpans.push(wrapper);
+        const content = this.lastContainer(this.currentLastBlock(context).content);
+        content.push(wrapper);
     }
 
     endSpan(context) {
+        this.status.currentSpans.pop();
         const content = this.lastContainerParent(this.currentLastBlock(context).content);
         content.push("");
     }
