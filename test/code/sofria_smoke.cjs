@@ -30,7 +30,7 @@ test(
             const query = '{docSets { id documents {id bookCode: header(id:"bookCode")} } }';
             const gqlResult = pk.gqlQuerySync(query);
             const docSetId = gqlResult.data.docSets[0].id;
-            const documentId = gqlResult.data.docSets[0].documents.filter(d => d.bookCode === 'PSA')[0].id;
+            const documentId = gqlResult.data.docSets[0].documents.filter(d => d.bookCode === 'MRK')[0].id;
             const config2 = await doRender(
                 pk,
                 config,
@@ -39,7 +39,7 @@ test(
             );
             const resultDocument = Object.values(config2.documents)[0];
             // console.log(JSON.stringify(config2.validations, null, 2));
-            // console.log(JSON.stringify(resultDocument, null, 2));
+            console.log(JSON.stringify(resultDocument, null, 2));
             // console.log(JSON.stringify(resultDocument.sequences[resultDocument.main_sequence_id], null, 2));
             t.deepEqual(invalidDocs(config2.validations), {});
         } catch (err) {

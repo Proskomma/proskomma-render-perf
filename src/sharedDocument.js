@@ -53,6 +53,25 @@ function lastContainerParent(content) {
     }
 }
 
+function removeEmptyStrings(content) {
+    let ret = [];
+    for (const item of content) {
+        if (typeof item === 'string' && item !== "") {
+            ret.push(item);
+        } else if (typeof item !== 'string') {
+            const newItem = {... item};
+            if ('content' in item) {
+                newItem.content = removeEmptyStrings(item.content);
+            }
+            if ('metaContent' in item) {
+                newItem.metaContent = removeEmptyStrings(item.metaContent);
+            }
+            ret.push(newItem);
+        }
+    }
+    return ret;
+}
+
 class JsonMainDocument extends ScriptureParaDocument {
 
     setupDocuments(context, jsonType, structureVersion, constraintVersion) {
@@ -217,4 +236,4 @@ class JsonMainDocument extends ScriptureParaDocument {
 
 }
 
-export {lastStringContainer, lastContainer, lastContainerParent, JsonMainDocument};
+export {lastStringContainer, lastContainer, lastContainerParent, removeEmptyStrings, JsonMainDocument};

@@ -1,6 +1,12 @@
 import {usfmHelps} from 'proskomma-json-tools';
 import {camelCase2snakeCase} from './changeCase';
-import {lastStringContainer, lastContainer, lastContainerParent, JsonMainDocument} from './sharedDocument';
+import {
+    lastStringContainer,
+    lastContainer,
+    lastContainerParent,
+    JsonMainDocument,
+    removeEmptyStrings
+} from './sharedDocument';
 
 export default class PerfMainDocument extends JsonMainDocument {
 
@@ -43,6 +49,22 @@ export default class PerfMainDocument extends JsonMainDocument {
                 this.setupDocuments(context, 'perf', '0.2.0', '0.2.0');
             }
         );
+
+        this.addAction(
+            'endDocument',
+            () => true,
+            (renderer, context, data) => {
+                for (const sequence of Object.values(this.config.documents[context.document.id].sequences)) {
+                    for (const block of sequence.blocks) {
+                        if (block.type === 'graft') {
+                            continue;
+                        }
+                        block.content = removeEmptyStrings(block.content);
+                    }
+                }
+            }
+        );
+
         this.addAction(
             'startSequence',
             () => true,

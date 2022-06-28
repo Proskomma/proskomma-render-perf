@@ -1,7 +1,13 @@
 import {ScriptureParaDocument} from 'proskomma-render';
 import {usfmHelps} from 'proskomma-json-tools';
 import {camelCase2snakeCase} from './changeCase';
-import {lastStringContainer, lastContainer, lastContainerParent, JsonMainDocument} from './sharedDocument';
+import {
+    lastStringContainer,
+    lastContainer,
+    lastContainerParent,
+    JsonMainDocument,
+    removeEmptyStrings
+} from './sharedDocument';
 
 export default class SofriaMainDocument extends JsonMainDocument {
 
@@ -47,7 +53,19 @@ export default class SofriaMainDocument extends JsonMainDocument {
                 this.config.documents[context.document.id].sequences = {}; // TEMPORARY
             });
 
-        this.addAction(
+            this.addAction(
+                'endDocument',
+                () => true,
+                (renderer, context, data) => {
+                    for (const sequence of Object.values(this.config.documents[context.document.id].sequences)) {
+                        for (const block of sequence.blocks) {
+                            block.content = removeEmptyStrings(block.content);
+                        }
+                    }
+                }
+            );
+
+            this.addAction(
             'startSequence',
             () => true,
             (renderer, context, data) => {
@@ -109,7 +127,13 @@ export default class SofriaMainDocument extends JsonMainDocument {
                     atts: {
                         number: this.status.currentChapter
                     },
-                    content: []
+                    content: [{
+                        type: "mark",
+                        sub_type: "chapter_label",
+                        atts: {
+                            number: this.status.currentChapter
+                        }
+                    }]
                 })
             }
         );
@@ -136,7 +160,13 @@ export default class SofriaMainDocument extends JsonMainDocument {
                     atts: {
                         number: this.status.currentVerses
                     },
-                    content: []
+                    content: [{
+                        type: "mark",
+                        sub_type: "verses_label",
+                        atts: {
+                            number: this.status.currentVerses
+                        }
+                    }]
                 })
                 for (const spanObject of this.status.currentSpans) {
                     const content = this.lastContainer(this.currentLastBlock(context).content);
