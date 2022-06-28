@@ -59,7 +59,7 @@ class JsonMainDocument extends ScriptureParaDocument {
         const docSetContext = this.docSetModel.context.docSet;
         this.config.documents[context.document.id] = {
             "schema": {
-                "structure": jsonType === "perf" ? "flat" : "nested",
+                "structure": jsonType === "perf" ? "flat" : "flat", // TEMPORARY
                 "structure_version": structureVersion,
                 "constraints": [
                     {

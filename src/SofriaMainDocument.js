@@ -83,6 +83,17 @@ export default class SofriaMainDocument extends JsonMainDocument {
                         content: []
                     })
                 }
+                if (this.status.currentVerses) {
+                    const content = this.lastContainer(this.currentLastBlock(context).content);
+                    content.push({
+                        type: 'wrapper',
+                        sub_type: "verses",
+                        atts: {
+                            number: this.status.currentVerses
+                        },
+                        content: []
+                    })
+                }
             }
         );
 

@@ -24,7 +24,7 @@
   "dependencies": {
     "@babel/core": "^7.17.10",
     "ajv": "^8.11.0",
-    "proskomma-json-tools": "0.0.12",
+    "proskomma-json-tools": "0.0.13",
     "proskomma-render": "^0.6.0"
   },
   "devDependencies": {
