@@ -6,7 +6,8 @@ import {
     lastContainer,
     lastContainerParent,
     JsonMainDocument,
-    removeEmptyStrings
+    removeEmptyStrings,
+    nestSequences,
 } from './sharedDocument';
 
 export default class SofriaMainDocument extends JsonMainDocument {
@@ -50,22 +51,34 @@ export default class SofriaMainDocument extends JsonMainDocument {
             () => true,
             (renderer, context, data) => {
                 this.setupDocuments(context, 'sofria', '0.2.0', '0.2.0');
-                this.config.documents[context.document.id].sequences = {}; // TEMPORARY
+                this.config.documents[context.document.id].main_sequence_id = {};
             });
 
-            this.addAction(
-                'endDocument',
-                () => true,
-                (renderer, context, data) => {
-                    for (const sequence of Object.values(this.config.documents[context.document.id].sequences)) {
-                        for (const block of sequence.blocks) {
-                            block.content = removeEmptyStrings(block.content);
+        this.addAction(
+            'endDocument',
+            () => true,
+            (renderer, context, data) => {
+                const currentOutputDocument = this.config.documents[context.document.id];
+                for (const sequence of Object.values(currentOutputDocument.sequences)) {
+                    for (const block of sequence.blocks) {
+                        if (block.type === 'graft') {
+                            continue;
                         }
+                        block.content = removeEmptyStrings(block.content);
                     }
                 }
-            );
+                currentOutputDocument.sequence = currentOutputDocument.sequences[currentOutputDocument.main_sequence_id];
+                nestSequences(
+                    currentOutputDocument.sequences,
+                    currentOutputDocument.sequence
+                );
+                delete currentOutputDocument.sequences;
+                delete currentOutputDocument.main_sequence_id;
 
-            this.addAction(
+            }
+        );
+
+        this.addAction(
             'startSequence',
             () => true,
             (renderer, context, data) => {
@@ -90,7 +103,7 @@ export default class SofriaMainDocument extends JsonMainDocument {
                         content: [""],
                     }
                 );
-                if (this.status.currentChapter) {
+                if (this.status.currentChapter && context.sequenceStack[0].type === 'main') {
                     const content = this.currentLastBlock(context).content;
                     content.push({
                         type: 'wrapper',
@@ -101,7 +114,7 @@ export default class SofriaMainDocument extends JsonMainDocument {
                         content: []
                     })
                 }
-                if (this.status.currentVerses) {
+                if (this.status.currentVerses && context.sequenceStack[0].type === 'main') {
                     const content = this.lastContainer(this.currentLastBlock(context).content);
                     content.push({
                         type: 'wrapper',
@@ -112,6 +125,35 @@ export default class SofriaMainDocument extends JsonMainDocument {
                         content: []
                     })
                 }
+            }
+        );
+
+        this.addAction(
+            'blockGraft',
+            () => true,
+            (renderer, context, data) => {
+                this.currentBlocks(context).push(
+                    {
+                        type: "graft",
+                        target: data.payload
+                    }
+                );
+                this.renderSequenceId(data.payload);
+            }
+        );
+
+        this.addAction(
+            'inlineGraft',
+            () => true,
+            (renderer, context, data) => {
+                const content = this.lastContainer(this.currentLastBlock(context).content);
+                content.push(
+                    {
+                        type: "graft",
+                        target: data.payload
+                    }
+                );
+                this.renderSequenceId(data.payload);
             }
         );
 
@@ -228,7 +270,8 @@ export default class SofriaMainDocument extends JsonMainDocument {
         this.addAction(
             'scope',
             (context, data) => data.subType === 'end' && data.payload.startsWith("milestone/") && data.payload.split('/')[1] === 'ts',
-            (renderer, context, data) => {},
+            (renderer, context, data) => {
+            },
         );
 
         this.addAction(

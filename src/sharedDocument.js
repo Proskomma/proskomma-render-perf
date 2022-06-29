@@ -59,7 +59,7 @@ function removeEmptyStrings(content) {
         if (typeof item === 'string' && item !== "") {
             ret.push(item);
         } else if (typeof item !== 'string') {
-            const newItem = {... item};
+            const newItem = {...item};
             if ('content' in item) {
                 newItem.content = removeEmptyStrings(item.content);
             }
@@ -72,13 +72,46 @@ function removeEmptyStrings(content) {
     return ret;
 }
 
+function nestSequences(sequences, seq) {
+    const nestContent = function (container) {
+        return container.map(
+            i => {
+                if (i.type === 'graft') {
+                    i.sequence = nestSequences(sequences, sequences[i.target]);
+                } else if (i.type === 'wrapper') {
+                    for (const container of ["content", "metaContent"]) {
+                        if (i[container]) {
+                            i[container] = nestContent(i[container])
+                        }
+                    }
+                }
+                return i;
+            }
+        )
+    }
+    const ret = seq; // shallow copy
+    for (const block of seq.blocks) {
+        if (block.type === 'graft') {
+            block.sequence = nestSequences(sequences, sequences[block.target]);
+            delete block.target;
+        } else {
+            for (const container of ["content", "metaContent"]) {
+                if (block[container]) {
+                    block[container] = nestContent(block[container])
+                }
+            }
+        }
+    }
+    return ret;
+}
+
 class JsonMainDocument extends ScriptureParaDocument {
 
     setupDocuments(context, jsonType, structureVersion, constraintVersion) {
         const docSetContext = this.docSetModel.context.docSet;
         this.config.documents[context.document.id] = {
             "schema": {
-                "structure": jsonType === "perf" ? "flat" : "flat", // TEMPORARY
+                "structure": jsonType === "perf" ? "flat" : "nested",
                 "structure_version": structureVersion,
                 "constraints": [
                     {
@@ -100,9 +133,7 @@ class JsonMainDocument extends ScriptureParaDocument {
                 }
             }
         };
-        if (jsonType === "perf") {
-            this.config.documents[context.document.id].sequences = {};
-        }
+        this.config.documents[context.document.id].sequences = {};
         docSetContext.tags.forEach(
             t => {
                 if (t.includes(':')) {
@@ -198,7 +229,7 @@ class JsonMainDocument extends ScriptureParaDocument {
         });
     }
 
-    endMilestone (context, data) {
+    endMilestone(context, data) {
         const content = this.lastContainer(this.currentLastBlock(context).content);
         content.push({
             type: "end_milestone",
@@ -206,7 +237,7 @@ class JsonMainDocument extends ScriptureParaDocument {
         });
     }
 
-    startAttribute (context, data) {
+    startAttribute(context, data) {
         const attBits = data.payload.split('/');
         const milestoneType = attBits[1];
         const attKey = attBits[3];
@@ -236,4 +267,4 @@ class JsonMainDocument extends ScriptureParaDocument {
 
 }
 
-export {lastStringContainer, lastContainer, lastContainerParent, removeEmptyStrings, JsonMainDocument};
+export {lastStringContainer, lastContainer, lastContainerParent, removeEmptyStrings, nestSequences, JsonMainDocument};
