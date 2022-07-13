@@ -25,7 +25,7 @@ test(
             const succinctJson = fse.readJsonSync(path.resolve(path.join(__dirname, '..', 'test_data', 'fra_lsg_succinct.json')));
             pk.loadSuccinctDocSet(succinctJson);
             const config = {
-                jsonType: ["perf", "0.2.0"],
+                jsonType: ["perf", "0.2.1"],
             };
             const query = '{docSets { id documents {id bookCode: header(id:"bookCode")} } }';
             const gqlResult = pk.gqlQuerySync(query);
@@ -57,7 +57,7 @@ test(
             const usfm = fse.readFileSync(path.resolve(path.join(__dirname, '..', 'test_data', 'bcs-hi_irv.rev.usfm'))).toString();
             pk.importDocuments({org: 'bcs', lang: 'hi', abbr: 'irv'}, 'usfm', [usfm]);
             const config = {
-                jsonType: ["perf", "0.2.0"],
+                jsonType: ["perf", "0.2.1"],
                 output: {
                     docSets: {},
                 }

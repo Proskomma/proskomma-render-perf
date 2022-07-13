@@ -25,7 +25,7 @@ test(
             const succinctJson = fse.readJsonSync(path.resolve(path.join(__dirname, '..', 'test_data', 'fra_lsg_succinct.json')));
             pk.loadSuccinctDocSet(succinctJson);
             const config = {
-                jsonType: ["sofria", "0.2.0"],
+                jsonType: ["sofria", "0.2.1"],
             };
             const query = '{docSets { id documents {id bookCode: header(id:"bookCode")} } }';
             const gqlResult = pk.gqlQuerySync(query);

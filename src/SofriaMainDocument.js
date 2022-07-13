@@ -99,7 +99,7 @@ export default class SofriaMainDocument extends JsonMainDocument {
                 this.currentBlocks(context).push(
                     {
                         type: "paragraph",
-                        sub_type: `usfm:${context.sequenceStack[0].block.blockScope.split('/')[1] || context.sequenceStack[0].block.blockScope}`,
+                        subtype: `usfm:${context.sequenceStack[0].block.blockScope.split('/')[1] || context.sequenceStack[0].block.blockScope}`,
                         content: [""],
                     }
                 );
@@ -107,7 +107,7 @@ export default class SofriaMainDocument extends JsonMainDocument {
                     const content = this.currentLastBlock(context).content;
                     content.push({
                         type: 'wrapper',
-                        sub_type: "chapter",
+                        subtype: "chapter",
                         atts: {
                             number: this.status.currentChapter
                         },
@@ -118,7 +118,7 @@ export default class SofriaMainDocument extends JsonMainDocument {
                     const content = this.lastContainer(this.currentLastBlock(context).content);
                     content.push({
                         type: 'wrapper',
-                        sub_type: "verses",
+                        subtype: "verses",
                         atts: {
                             number: this.status.currentVerses
                         },
@@ -165,13 +165,13 @@ export default class SofriaMainDocument extends JsonMainDocument {
                 const content = this.currentLastBlock(context).content;
                 content.push({
                     type: 'wrapper',
-                    sub_type: "chapter",
+                    subtype: "chapter",
                     atts: {
                         number: this.status.currentChapter
                     },
                     content: [{
                         type: "mark",
-                        sub_type: "chapter_label",
+                        subtype: "chapter_label",
                         atts: {
                             number: this.status.currentChapter
                         }
@@ -198,13 +198,13 @@ export default class SofriaMainDocument extends JsonMainDocument {
                 const content = this.lastContainer(this.currentLastBlock(context).content);
                 content.push({
                     type: 'wrapper',
-                    sub_type: "verses",
+                    subtype: "verses",
                     atts: {
                         number: this.status.currentVerses
                     },
                     content: [{
                         type: "mark",
-                        sub_type: "verses_label",
+                        subtype: "verses_label",
                         atts: {
                             number: this.status.currentVerses
                         }

@@ -25,7 +25,7 @@ test(
             const usfm = fse.readFileSync(path.resolve(path.join(__dirname, '..', 'test_data', 'dcs-ult-tit.usfm'))).toString();
             pk.importDocuments({org: 'dcs', lang: 'en', abbr: 'ult'}, 'usfm', [usfm]);
             const config = {
-                jsonType: ["perf", "0.2.0"],
+                jsonType: ["perf", "0.2.1"],
                 output: {
                     docSets: {},
                 }

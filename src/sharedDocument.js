@@ -165,7 +165,7 @@ class JsonMainDocument extends ScriptureParaDocument {
         this.currentBlocks(context).push(
             {
                 type: "paragraph",
-                sub_type: `usfm:${context.sequenceStack[0].block.blockScope.split('/')[1] || context.sequenceStack[0].block.blockScope}`,
+                subtype: `usfm:${context.sequenceStack[0].block.blockScope.split('/')[1] || context.sequenceStack[0].block.blockScope}`,
                 content: [""],
             }
         );
@@ -179,7 +179,7 @@ class JsonMainDocument extends ScriptureParaDocument {
     startSpan(context, data) {
         const wrapper = {
             type: "wrapper",
-            sub_type: `usfm:${data.payload.split('/')[1]}`,
+            subtype: `usfm:${data.payload.split('/')[1]}`,
             content: [],
         };
         this.status.currentSpans.push(wrapper);
@@ -196,7 +196,7 @@ class JsonMainDocument extends ScriptureParaDocument {
     startSpanWithAtts(context, data) {
         const wrapper = {
             type: "wrapper",
-            sub_type: `usfm:${data.payload.split('/')[1]}`,
+            subtype: `usfm:${data.payload.split('/')[1]}`,
             content: [],
             atts: {},
         };
@@ -215,7 +215,7 @@ class JsonMainDocument extends ScriptureParaDocument {
         const content = this.lastContainer(this.currentLastBlock(context).content);
         content.push({
             type: "mark",
-            sub_type: `usfm:ts`,
+            subtype: `usfm:ts`,
             atts: {},
         });
     }
@@ -224,7 +224,7 @@ class JsonMainDocument extends ScriptureParaDocument {
         const content = this.lastContainer(this.currentLastBlock(context).content);
         content.push({
             type: "start_milestone",
-            sub_type: `usfm:${data.payload.split('/')[1]}`,
+            subtype: `usfm:${data.payload.split('/')[1]}`,
             atts: {},
         });
     }
@@ -233,7 +233,7 @@ class JsonMainDocument extends ScriptureParaDocument {
         const content = this.lastContainer(this.currentLastBlock(context).content);
         content.push({
             type: "end_milestone",
-            sub_type: `usfm:${data.payload.split('/')[1]}`,
+            subtype: `usfm:${data.payload.split('/')[1]}`,
         });
     }
 

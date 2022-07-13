@@ -94,7 +94,7 @@ export default class PerfMainDocument extends JsonMainDocument {
                 this.currentBlocks(context).push(
                     {
                         type: "graft",
-                        sub_type: camelCase2snakeCase(data.subType),
+                        subtype: camelCase2snakeCase(data.subType),
                         target: data.payload,
                     }
                 );
@@ -110,7 +110,7 @@ export default class PerfMainDocument extends JsonMainDocument {
                 content.push(
                     {
                         type: "graft",
-                        sub_type: camelCase2snakeCase(data.subType),
+                        subtype: camelCase2snakeCase(data.subType),
                         target: data.payload,
                     }
                 );
@@ -125,7 +125,7 @@ export default class PerfMainDocument extends JsonMainDocument {
                 const content = this.lastContainer(this.currentLastBlock(context).content);
                 content.push({
                     type: 'mark',
-                    sub_type: data.payload.split('/')[0],
+                    subtype: data.payload.split('/')[0],
                     atts: {
                         number: `${data.payload.split('/')[1]}`
                     }
